@@ -1,0 +1,137 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% DOCUMENT PREAMBLE %%%
+\documentclass[12pt]{report}
+\usepackage[english]{babel}
+%\usepackage{natbib}
+\usepackage{url}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\graphicspath{{images/}}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{vmargin}
+\setmarginsrb{3 cm}{2.5 cm}{3 cm}{2.5 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
+
+\title{Tutorial for Nautilus}								
+% Title
+\author{ Sacha Gavino}						
+% Author
+\date{today's date}
+% Date
+
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\theauthor}
+\lhead{\thetitle}
+\cfoot{\thepage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{titlepage}
+	\centering
+    \vspace*{0.5 cm}
+   % \includegraphics[scale = 0.075]{bsulogo.png}\\[1.0 cm]	% University Logo
+
+
+	\rule{\linewidth}{0.2 mm} \\[0.4 cm]
+	{ \huge \bfseries \thetitle}\\
+	\rule{\linewidth}{0.2 mm} \\[1.5 cm]
+	
+	\begin{minipage}{0.4\textwidth}
+		\begin{flushleft} \large
+		%	\emph{Submitted To:}\\
+		%	Name\\
+          % Affiliation\\
+           %contact info\\
+			\end{flushleft}
+			\end{minipage}~
+			\begin{minipage}{0.4\textwidth}
+            
+			\begin{flushright} \large
+
+			Sacha Gavino 
+
+		\end{flushright}
+           
+	\end{minipage}\\[2 cm]
+	
+	\includegraphics[scale = 0.5]{../nautilus_logo.pdf}
+    
+    
+    
+    
+	
+\end{titlepage}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\thesection}{\arabic{section}}
+\section{Section 1}
+ 
+
+The paper will look professional and is typed in LaTeX. Make sure the cover page       includes the Project Title, Team Names, Date, and PIC Math Logo (1 point).
+
+Remaining pages should include: (7 points) 
+
+1.Problem summary: state the industrial problem, its context, and its significance; include a list of most important questions to be addressed. State the industrial sponsor of the project. 
+
+2.Statement of your results, with assumptions and questions(one page).
+
+3.Details about your (one of several) approaches to problem; elaborate which questions are important and why; your results and/or anticipations (this is where your mathematics details fit); relevant information from your sources (citing for example \cite{ACAMP}) and what the team is incorporating from each source; details of your solution, if any; relevant tables and graphs (tables and graphs pages do not count towards the page limit). State your work and include references - you might never make use of reference \cite{ACMT} but it is a great paper.
+
+4.Conclusions with questions, implications and ideas for future work
+
+5.Extended Bibliography List (not included in page limit) in the following format: 
+
+[1] Author name(s). Paper title. Journal name, volume XY, pages ab-cd, year. 
+
+6.Acknowledgments page, stating:
+
+?PIC Math is a program of the Mathematical Association of America (MAA) and the Society for Industrial and AppliedMathematics (SIAM). Support is provided by the National Science Foundation (NSF grant DMS-1345499).?
+
+7.Advisor names, etc. 
+
+Flow /Visual Composition/Grammar/Spelling (2 points) 
+
+\newpage
+\section{Acknowledgments}
+
+ PIC Math is a program of the Mathematical Association of America (MAA) and the Society for Industrial and Applied Mathematics (SIAM). Support is provided by the National Science Foundation (NSF grant DMS-1345499).
+\newpage
+ 
+\begin{thebibliography}{111}
+   
+  \bibitem{ACMT}
+A. Aldroubi, C. Cabrelli, U. Molter, and Sui Tang,
+Dynamical sampling, 
+{\it  Applied and Computational Harmonic Analysis}, doi:10.1016/j.acha.2015.08.014, 2016
+
+%if the "underfill \hbox" warning bothers you uncomment the following line
+%\raggedright
+\bibitem{ACAMP}
+    A. Aldroubi, C. Cabrelli, A. F. Cakmak, U. Molter,  and A. Petrosyan,
+    Iterative actions of normal operators, 
+    Submitted. Available at http://arxiv.org/abs/1602.04527.
+  
+\bibitem{Gro01} 
+    K. Groechenig,
+    {\it Foundations of time-frequency analysis}, 
+    Birkh\"auser Boston, 2001.
+
+\end{thebibliography}
+\end{document}
+
+%This template was created by Roza Aceska.
