@@ -1220,8 +1220,8 @@ abCO(1:nb_grains) = 0.d0
 !
 !      --- COMPUTATION OF PHOTORATES IN THE CASE OF DISKS
 !
-!       HERE WE COMPUTE THE PHOTORATES FOR THE SPECIES CONTAINED IN THE
-! PARAM.TXT FILE
+!       HERE, WE COMPUTE THE PHOTORATES FOR THE SPECIES CONTAINED IN THE
+! FOLDER CROSS-SECTIONS
 !------------------------------------------------------------
 ! if use compute UV_FLUX from flux/ folder then
 UV_FLUX =  sum(local_flux_dust(1:wv_max_factor,1))/sum(flux_isrf_dust(1:wv_max_factor,1)) ! UV factor for the original rates calculation.
@@ -1430,8 +1430,15 @@ endif
     endif
 
 
-!    if ((photo_disk.eq.1).and.(NH2.ne.0.D0)) then
-    IF (photo_disk.eq.1) THEN
+!------------------------------------------------------------
+!
+!      --- COMPUTATION OF PHOTORATES USING CROSS-SECTION 
+!          FORMALISM (see Heays et al. 2017 and documentation)
+!    
+!      --- WE COMPUTE THE PHOTORATES FOR THE SPECIES CONTAINED 
+!          IN THEFOLDER CROSS-SECTIONS
+!------------------------------------------------------------
+    IF (photo_disk.eq.1) THEN 
         FLAG_DISK = .FALSE.
         DO l=1,nb_line_photorates ! number of photo reactions of molecules with cross-sections (as many as in file branching_ratios.in)
             IF ( reaction_compounds_names_photo(l,1).eq.REACTION_COMPOUNDS_NAMES(1,J) .and. &
@@ -1467,50 +1474,57 @@ endif
         end if
     END IF
 
+  enddo
 
-enddo
 
-  !-------------------------------------------------------------
-  !     (97) Gas-phase equivalent formation
-  !
-  !     This process was included to form H2 even in the cases where the
-  !     dust temperature is too high.
-  !     The H2 formation is sensitive to dust temperature and doesn't form
-  !     effectively on hot grain. This section takes into account the effect
-  !     of simultaneous fluctuations of dust temperature and adsorbed H atoms
-  !     population on the H2 formation rates. We compute interpolated values of
-  !     rate from data of reference hereafter.
-  !
-  !>    REFERENCE: --> Bron et al. (2014)
-  !
-  !-------------------------------------------------------------
 
-    IF (is_h2_formation_rate.eq.1) THEN ! h2_formation flag
-        if (x_i.le.height_h2formation) then ! height threshold above where to use the h2 formation rates method.
-            do J=type_id_start(97),type_id_stop(97)
-                stick_Tgas = 1/(1 + (gas_temperature(x_i)/T_2)**beta) ! sticking function at gas_temperature
-                stick_100 = 1/(1 + (100./T_2)**beta) ! reference sticking function at 100K. Bron et al. (2014) used 100K.
-                n_eq = H_number_density(x_i)*sqrt(gas_temperature(x_i)/100)*(stick_Tgas/stick_100) ! equivalent density of H.
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+!> @author: 
+!> Sacha Gavino
+!
+!> @date 2019
+!
+!  (97) Gas-phase equivalent H2 formation
+!
+!  DESCRIPTION:
+!  This process is used to form sufficient H2 when a multiple grain sizes model 
+!  is used.
+!
+!  The H2 formation is very sensitive to dust temperature and does not form
+!  effectively on very warm grains in PDR regions. This section takes into 
+!  account the effect of simultaneous fluctuations of dust temperature and 
+!  adsorbed H atoms population on the H2 formation rates. We compute 
+!  interpolated values of rate from data of reference hereafter.
+!
+!>    REFERENCE: --> Bron et al. (2014)
 
-                ! function to get the interpolated rates at smallest G0 (flux in draine's) as in Bron et al. (2014) figure 6:
-                rate_max = (5.4D2*n_eq*rate_smallest_density)/sqrt(n_eq**1.9565 + 3.0D5)
+  IF (is_h2_formation_rate.eq.1) THEN ! h2_formation flag in parameters.in
+      if (x_i.le.height_h2formation) then ! height threshold above where to use the h2 formation rates method.
+          do J=type_id_start(97),type_id_stop(97)
+              stick_Tgas = 1/(1 + (gas_temperature(x_i)/T_2)**beta) ! sticking function at gas_temperature
+              stick_100 = 1/(1 + (100./T_2)**beta) ! reference sticking function at 100K. Bron et al. (2014) used 100K.
+              n_eq = H_number_density(x_i)*sqrt(gas_temperature(x_i)/100)*(stick_Tgas/stick_100) ! equivalent density of H.
 
-                ! function to fit equivalent curves as in Bron et al. (2014) figure 6, for chosen flux factor, temperature and density:
-                !alpha = 0.49D1/log2(2 + 1D1*n_eq)
-                alpha = 0.49D1/log(2 + 1.5D4*n_eq)
-                A = 2 + exp(1.25*smallest_flux**alpha)
-                if (photo_disk.eq.1) then
-                    fitted_value = rate_max*A*(1/(2 + exp(1.25*INT_LOCAL_FLUX**alpha)))
-                else if (photo_disk.eq.0) then
-                    fitted_value = rate_max*A*(1/(2 + exp(1.25*(EXP(-RATE_C(J)*actual_av)*UV_FLUX)**alpha)))
-                end if
-                reaction_rates(J) = RATE_A(J) * fitted_value
-                !write (*,*) reaction_rates(J)
-            enddo
-        else
-            reaction_rates(J) = 0.d0
-        end if ! end height threshold
-    END IF ! end h2_formation flag
+              ! function to get the interpolated rates at smallest G0 (flux in draine's) as in Bron et al. (2014) figure 6:
+              rate_max = (5.4D2*n_eq*rate_smallest_density)/sqrt(n_eq**1.9565 + 3.0D5)
+              
+              ! function to fit equivalent curves as in Bron et al. (2014) figure 6, for chosen flux factor, temperature and density:
+              !alpha = 0.49D1/log2(2 + 1D1*n_eq)
+              alpha = 0.49D1/log(2 + 1.5D4*n_eq)
+              A = 2 + exp(1.25*smallest_flux**alpha)
+              if (photo_disk.eq.1) then
+                  fitted_value = rate_max*A*(1/(2 + exp(1.25*INT_LOCAL_FLUX**alpha)))
+              else if (photo_disk.eq.0) then
+                  fitted_value = rate_max*A*(1/(2 + exp(1.25*(EXP(-RATE_C(J)*actual_av)*UV_FLUX)**alpha)))
+              end if
+              reaction_rates(J) = RATE_A(J) * fitted_value
+              !write (*,*) reaction_rates(J)
+          enddo
+      else
+          reaction_rates(J) = 0.d0
+      end if ! end height threshold
+  END IF ! end h2_formation flag
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
   !------------------------------------------------------------
