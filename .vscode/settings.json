@@ -1,7 +1,0 @@
-{
-    "search.exclude": {
-        "cross-sections": true,
-        "documentation": true,
-        "inputs": true
-    }
-}
