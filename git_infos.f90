@@ -12,7 +12,7 @@
 module git_infos
 implicit none
 
-character(len=40), parameter :: commit = 'b68423f479afef744b3400c018b80a4b5c2826c6' !< commit ID when binary was compiled 
+character(len=40), parameter :: commit = '2fd5048eba7e368158ea7cefcb06fe27f2649dc1' !< commit ID when binary was compiled 
 character(7), parameter :: branch = 'develop' !< branch name when compilation occured
 character(len=80), parameter :: modifs = '/!\ There is non committed modifications'
 

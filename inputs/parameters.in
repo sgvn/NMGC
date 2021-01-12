@@ -28,10 +28,11 @@ grain_temperature_type = fixed_to_dust_size ! fixed, fixed_to_dust_size, gas, ta
 ! table_1D: Tgrain is read in the 1D_static. dat file (5th column) ; 
 ! computed: calculated from uv_flux and visual extinction by radiative equilibrium
 is_dust_1D = 1 ! Reading the grain abundance and the NH/AV factor in the 1D_static.dat file (mostly for disks)
-photo_disk = 1 ! Computation of photodissociation rates for protoplanetary disks.
+photo_disk = 1 ! Computation of photodissociation rates for disk models.
 is_grain_reactions = 1 ! Accretion, grain surface reactions
 is_h2_adhoc_form = 0 ! Ad hoc formation of H2 on grain surfaces (1=activated)
-is_h2_formation_rate = 1 ! h2 formation rates on surfaces from Bron et al: (2014)
+is_h2_formation_rate = 1 ! h2 formation rates defined from B14 (Bron et al. 2014)
+height_h2formation = 32 ! Spatial point above which B14's method is used. If 0 then B14 is not used at all.
 is_absorption_h2 = 1 ! H2 self-shielding from Lee & Herbst (1996) (1=activated)
 is_absorption_co = 2 ! CO self-shielding. (1: Lee & Herbst (1996),  2: Visser et al. (2009)
 is_absorption_n2 = 1 ! N2 self-shielding from Li et al. (2013) (1=activated)

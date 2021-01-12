@@ -529,7 +529,7 @@ do I=0,MAX_NUMBER_REACTION_TYPE-1
   enddo
 enddo
 
-! Find the index of CO, H2, H, He and grain0
+! Find the index of CO, H2, H, He and grain0 PLUS H2O and a few other contained in folder cross-sections.
 do i=1,nb_species
   if (species_name(i).eq.YH2)   INDH2=i
   if (species_name(i).eq.YH)    INDH=i
@@ -541,6 +541,10 @@ do i=1,nb_species
   if (species_name(i).eq.YJH2O) INDJH2O=i
   if (species_name(i).eq.YHE)   INDHE=i
   if (species_name(i).eq.YN2)   INDN2=i
+  if (species_name(i).eq.YCH)   INDCH=i
+  if (species_name(i).eq.YCH3)   INDCH3=i
+  if (species_name(i).eq.YH2CO)   INDH2CO=i
+
   do j=1,nb_grains
     if (species_name(i).eq.YGRAIN(j)) INDGRAIN(j)=i
     if (species_name(i).eq.YGRAIN_MINUS(j)) INDGRAIN_MINUS(j)=i

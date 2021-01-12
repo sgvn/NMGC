@@ -710,6 +710,21 @@ if (isDefined) then
     deallocate(NH2_z)
     deallocate(NN2_z)
     deallocate(NCO_z)
+    deallocate(NH2O_z)
+    deallocate(NCO2_z)
+    deallocate(NN2O_z)
+    deallocate(NCH_z)
+    deallocate(NCH3_z)
+    deallocate(NCH4_z)
+    deallocate(NOH_z)
+    deallocate(NHCO_z)
+    deallocate(NH2CO_z)
+    deallocate(NCN_z)
+    deallocate(NHCN_z)
+    deallocate(NHNC_z)
+    deallocate(NNH_z)
+    deallocate(NNH2_z)
+    deallocate(NNH3_z)
   end if
   allocate(grid_sample(nb_values))
   allocate(H_number_density(nb_values))
@@ -723,12 +738,42 @@ if (isDefined) then
   allocate(NH2_z(nb_values))
   allocate(NN2_z(nb_values))
   allocate(NCO_z(nb_values))
+  allocate(NH2O_z(nb_values))
+  allocate(NCO2_z(nb_values))
+  allocate(NN2O_z(nb_values))
+  allocate(NCH_z(nb_values))
+  allocate(NCH3_z(nb_values))
+  allocate(NCH4_z(nb_values))
+  allocate(NOH_z(nb_values))
+  allocate(NHCO_z(nb_values))
+  allocate(NH2CO_z(nb_values))
+  allocate(NCN_z(nb_values))
+  allocate(NHCN_z(nb_values))
+  allocate(NHNC_z(nb_values))
+  allocate(NNH_z(nb_values))
+  allocate(NNH2_z(nb_values))
+  allocate(NNH3_z(nb_values))
 
   spatial_resolution = nb_values
   NH_z(1:nb_values) = 0.d0
   NH2_z(1:nb_values) = 0.d0
   NN2_z(1:nb_values) = 0.d0
   NCO_z(1:nb_values) = 0.d0
+  NH2O_z(1:nb_values) = 0.d0
+  NCO2_z(1:nb_values) = 0.d0
+  NN2O_z(1:nb_values) = 0.d0
+  NCH_z(1:nb_values) = 0.d0
+  NCH3_z(1:nb_values) = 0.d0
+  NCH4_z(1:nb_values) = 0.d0
+  NOH_z(1:nb_values) = 0.d0
+  NHCO_z(1:nb_values) = 0.d0
+  NH2CO_z(1:nb_values) = 0.d0
+  NCN_z(1:nb_values) = 0.d0
+  NHCN_z(1:nb_values) = 0.d0
+  NHNC_z(1:nb_values) = 0.d0
+  NNH_z(1:nb_values) = 0.d0
+  NNH2_z(1:nb_values) = 0.d0
+  NNH3_z(1:nb_values) = 0.d0
 
 
   ! We get the values of the torque profile in the file

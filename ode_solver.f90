@@ -1057,12 +1057,8 @@ end subroutine get_temporal_derivatives
   REAL(double_precision) :: stick_Tgas !< sticking function (Bron et al. (2014))
   REAL(double_precision) :: stick_100 !< sticking function (Bron et al. (2014))
   REAL(double_precision) :: beta = 1.5 !< Bron et al. (2014) -- Le Bourlot et al. (2012)
-  REAL(double_precision) :: rate_smallest_density = 1.6638469814542324D-19 ! data from Bron et al. (2014) figure 6, red curve.
   REAL(double_precision) :: rate_max ! interpolated max rate using data from Bron et al. (2014)
-  REAL(double_precision) :: alpha ! coefficient to fit data and get interpolated rates
-  REAL(double_precision) :: A ! coefficient to fit data and get interpolated rates
-  REAL(double_precision) :: smallest_flux = 0.6858086 ! smallest flux in Bron et al. data, figure 6 used for interpolation algorithm.
-  REAL(double_precision) :: fitted_value ! fitted value to get all h2 formation rates as a function of INT_LOCAL_FLUX and density
+  REAL(double_precision) :: Q ! fitted value to get H2 formation rates as a function of flux factor and gas density (as in Bron et al. 2014)
 
   ! FOR the bilinear interpolation of the shielding function of CO and N2
   REAL(double_precision) :: int
@@ -1216,44 +1212,22 @@ abCO(1:nb_grains) = 0.d0
   UVCR = 1.300d-17 / CR_IONISATION_RATE
 
 
-!------------------------------------------------------------
-!
-!      --- COMPUTATION OF PHOTORATES IN THE CASE OF DISKS
-!
-!       HERE, WE COMPUTE THE PHOTORATES FOR THE SPECIES CONTAINED IN THE
-! FOLDER CROSS-SECTIONS
-!------------------------------------------------------------
-! if use compute UV_FLUX from flux/ folder then
-UV_FLUX =  sum(local_flux_dust(1:wv_max_factor,1))/sum(flux_isrf_dust(1:wv_max_factor,1)) ! UV factor for the original rates calculation.
-        
-!else using value in parameters.in then
-!...
-!end if
+  !------------------------------------------------------------
+  ! HERE, WE CALL THE ROUTINES IN MODULE "PHOTORATES_DISKS.F90"
+  ! USED TO COMPUTE THE PHOTORATES FOR THE SPECIES CONTAINED IN THE
+  ! FOLDER CROSS-SECTIONS. 
+  !
+  ! ref: Haeys et al. (2017); Gavino et al. (2020)
+  !------------------------------------------------------------
+  if (photo_disk.eq.1) then
+    local_flux(:)   = 0.D0
+    UV_FLUX =  sum(local_flux(1:wv_max_factor))/sum(flux_isrf_dust(1:wv_max_factor,1)) ! UV factor for the original rates calculation.
+  
+    call compute_molopacity
+    call compute_local_flux
+    call compute_photorates
+  endif
 
-
-!if ((photo_disk.eq.1).and.(NH2.ne.0.D0)) then
-if (photo_disk.eq.1) then
-   ! do l = 1,nb_line_spec_photorates
-    ! first we test if the species in in nautilus
- !   write(*,*) 'species dans param.txt',spec_photo(l)
-    local_flux(:) = 0.D0
-    stellar_flux(:) = 0.D0
-    local_flux_2(:) = 0.D0
-    !do n = 1,nb_gaseous_species
-            !if (species_name(n).eq.spec_photo(l)) then
-               ! write(*,*) 'species dans gas_spec.in', species_name(n)
-                ! spec_photo_select = spec_photo(l)
-                call compute_molopacity
-                call compute_local_flux
-                call compute_photorates
-            !endif
-        !enddo
-    !enddo
-!write(*,*) 'toto'
-
-endif
-!write(*,*) 'UV_FLUX: ', UV_FLUX
-!write(*,*) 'UV_FLUX: ', INT_LOCAL_FLUX
   !------------------------------------------------------------
   !
   !      --- GAS PHASE REACTIONS
@@ -1436,7 +1410,7 @@ endif
 !          FORMALISM (see Heays et al. 2017 and documentation)
 !    
 !      --- WE COMPUTE THE PHOTORATES FOR THE SPECIES CONTAINED 
-!          IN THEFOLDER CROSS-SECTIONS
+!          IN THE FOLDER CROSS-SECTIONS
 !------------------------------------------------------------
     IF (photo_disk.eq.1) THEN 
         FLAG_DISK = .FALSE.
@@ -1467,7 +1441,7 @@ endif
                         end if
                     end if
                 end do
-            end IF
+            END IF
         END DO
         if (FLAG_DISK .eqv. .FALSE.) then
             reaction_rates(J) = RATE_A(J)*INT_LOCAL_FLUX
@@ -1482,12 +1456,12 @@ endif
 !> @author: 
 !> Sacha Gavino
 !
-!> @date 2019
+!> @date 2020
 !
 !  (97) Gas-phase equivalent H2 formation
 !
 !  DESCRIPTION:
-!  This process is used to form sufficient H2 when a multiple grain sizes model 
+!  This routine is used to form sufficient H2 when a multiple grain sizes model 
 !  is used.
 !
 !  The H2 formation is very sensitive to dust temperature and does not form
@@ -1496,35 +1470,41 @@ endif
 !  adsorbed H atoms population on the H2 formation rates. We compute 
 !  interpolated values of rate from data of reference hereafter.
 !
-!>    REFERENCE: --> Bron et al. (2014)
-
+!> REFERENCE: --> Bron et al. (2014) -- url: https://ui.adsabs.harvard.edu/abs/2014A%26A...569A.100B/abstract 
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
   IF (is_h2_formation_rate.eq.1) THEN ! h2_formation flag in parameters.in
-      if (x_i.le.height_h2formation) then ! height threshold above where to use the h2 formation rates method.
+      if (x_i.le.height_h2formation) then ! height threshold above where the B14's H2 formation rates is method.
           do J=type_id_start(97),type_id_stop(97)
               stick_Tgas = 1/(1 + (gas_temperature(x_i)/T_2)**beta) ! sticking function at gas_temperature
               stick_100 = 1/(1 + (100./T_2)**beta) ! reference sticking function at 100K. Bron et al. (2014) used 100K.
               n_eq = H_number_density(x_i)*sqrt(gas_temperature(x_i)/100)*(stick_Tgas/stick_100) ! equivalent density of H.
 
-              ! function to get the interpolated rates at smallest G0 (flux in draine's) as in Bron et al. (2014) figure 6:
-              rate_max = (5.4D2*n_eq*rate_smallest_density)/sqrt(n_eq**1.9565 + 3.0D5)
-              
-              ! function to fit equivalent curves as in Bron et al. (2014) figure 6, for chosen flux factor, temperature and density:
-              !alpha = 0.49D1/log2(2 + 1D1*n_eq)
-              alpha = 0.49D1/log(2 + 1.5D4*n_eq)
-              A = 2 + exp(1.25*smallest_flux**alpha)
+              ! Function to get the interpolated rates at smallest G (flux in draine's) as in Bron et al. (2014) figure 6:
+              rate_max = - 1.87663716d-1 + 8.65799199d-1*log10(n_eq)**1 + 2.70415877d-1*log10(n_eq)**2 &
+                                         - 1.62166137d-1*log10(n_eq)**3 + 2.71155186d-2*log10(n_eq)**4 &
+                                         - 1.38199458d-3*log10(n_eq)**5 - 9.77585488d-5*log10(n_eq)**6 &
+                                         + 1.36421392d-5*log10(n_eq)**7 - 4.22721562d-7*log10(n_eq)**8
+            
+
+               
+              ! Full function to fit curves as in Bron et al. (2014) figure 6, for chosen flux factor, temperature and density:
               if (photo_disk.eq.1) then
-                  fitted_value = rate_max*A*(1/(2 + exp(1.25*INT_LOCAL_FLUX**alpha)))
+                  Q = rate_max + (-0.24083058/n_eq**0.09)*log10(INT_LOCAL_FLUX)**1 &
+                               + (-0.5315985/n_eq**0.085)*log10(INT_LOCAL_FLUX)**2 &
+                               + (0.02165607/n_eq**0.5)*log10(INT_LOCAL_FLUX)**3
               else if (photo_disk.eq.0) then
-                  fitted_value = rate_max*A*(1/(2 + exp(1.25*(EXP(-RATE_C(J)*actual_av)*UV_FLUX)**alpha)))
+                  Q = rate_max + (-0.24083058/n_eq**0.09)*log10((EXP(-RATE_C(J)*actual_av)*UV_FLUX))**1 &
+                               + (-0.5315985/n_eq**0.085)*log10((EXP(-RATE_C(J)*actual_av)*UV_FLUX))**2 &
+                               + (0.02165607/n_eq**0.5)*log10((EXP(-RATE_C(J)*actual_av)*UV_FLUX))**3
               end if
-              reaction_rates(J) = RATE_A(J) * fitted_value
+
+              reaction_rates(J) = RATE_A(J) * 10**Q
               !write (*,*) reaction_rates(J)
           enddo
       else
           reaction_rates(J) = 0.d0
       end if ! end height threshold
   END IF ! end h2_formation flag
-!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 
   !------------------------------------------------------------
