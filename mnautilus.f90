@@ -211,12 +211,27 @@ do output_idx=1, NB_OUTPUTS
                               gas_temperature=gas_temperature(1)) ! Outputs
     endif
 
-    ! Column densities of H2 and CO are set to zero before each time evolution computation.
+    ! Column densities are set to zero before each time evolution computation.
 
     NH_z(1:spatial_resolution) = 0.d0
     NH2_z(1:spatial_resolution) = 0.d0
     NN2_z(1:spatial_resolution) = 0.d0
     NCO_z(1:spatial_resolution) = 0.d0
+    NH2O_z(1:spatial_resolution) = 0.d0
+    NCO2_z(1:spatial_resolution) = 0.d0
+    NN2O_z(1:spatial_resolution) = 0.d0
+    NCH_z(1:spatial_resolution) = 0.d0
+    NCH3_z(1:spatial_resolution) = 0.d0
+    NCH4_z(1:spatial_resolution) = 0.d0
+    NOH_z(1:spatial_resolution) = 0.d0
+    NHCO_z(1:spatial_resolution) = 0.d0
+    NH2CO_z(1:spatial_resolution) = 0.d0
+    NCN_z(1:spatial_resolution) = 0.d0
+    NHCN_z(1:spatial_resolution) = 0.d0
+    NHNC_z(1:spatial_resolution) = 0.d0
+    NNH_z(1:spatial_resolution) = 0.d0
+    NNH2_z(1:spatial_resolution) = 0.d0
+    NNH3_z(1:spatial_resolution) = 0.d0
 
     do x_i=1,spatial_resolution
 
@@ -277,6 +292,21 @@ do output_idx=1, NB_OUTPUTS
           NH2_z(x_i)= actual_av/AV_NH_ratio * abundances(indH2, x_i)
           NN2_z(x_i)= actual_av/AV_NH_ratio * abundances(indN2, x_i)
           NCO_z(x_i)= actual_av/AV_NH_ratio * abundances(indCO, x_i)
+          NH2O_z(x_i)= actual_av/AV_NH_ratio * abundances(indH2O, x_i)
+          NCH_z(x_i)= actual_av/AV_NH_ratio * abundances(indCH, x_i)
+          NCH3_z(x_i)= actual_av/AV_NH_ratio * abundances(indCH3, x_i)
+          NH2CO_z(x_i)= actual_av/AV_NH_ratio * abundances(indH2CO, x_i)
+          NCO2_z(x_i)= actual_av/AV_NH_ratio * abundances(indCO2, x_i)
+          NN2O_z(x_i)= actual_av/AV_NH_ratio * abundances(indN2O, x_i)
+          NCH4_z(x_i)= actual_av/AV_NH_ratio * abundances(indCH4, x_i)
+          NOH_z(x_i)= actual_av/AV_NH_ratio * abundances(indOH, x_i)
+          NHCO_z(x_i)= actual_av/AV_NH_ratio * abundances(indHCO, x_i)
+          NCN_z(x_i)= actual_av/AV_NH_ratio * abundances(indCN, x_i)
+          NHCN_z(x_i)= actual_av/AV_NH_ratio * abundances(indHCN, x_i)
+          NHNC_z(x_i)= actual_av/AV_NH_ratio * abundances(indHNC, x_i)
+          NNH_z(x_i)= actual_av/AV_NH_ratio * abundances(indNH, x_i)
+          NNH2_z(x_i)= actual_av/AV_NH_ratio * abundances(indNH2, x_i)
+          NNH3_z(x_i)= actual_av/AV_NH_ratio * abundances(indNH3, x_i)
 
       else
 
@@ -286,6 +316,21 @@ do output_idx=1, NB_OUTPUTS
           NH2_z(x_i) = NH2_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indH2, x_i)
           NN2_z(x_i) = NN2_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indN2, x_i)
           NCO_z(x_i) = NCO_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indCO, x_i)
+          NH2O_z(x_i) = NH2O_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indH2O, x_i)
+          NCH_z(x_i) = NCH_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indCH, x_i)
+          NCH3_z(x_i) = NCH3_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indCH3, x_i)
+          NH2CO_z(x_i) = NH2CO_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indH2CO, x_i)
+          NCO2_z(x_i) = NCO2_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indCO2, x_i)
+          NN2O_z(x_i) = NN2O_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indN2O, x_i)
+          NCH4_z(x_i) = NCH4_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indCH4, x_i)
+          NOH_z(x_i) = NOH_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indOH, x_i)
+          NHCO_z(x_i) = NHCO_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indHCO, x_i)
+          NCN_z(x_i) = NCN_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indCN, x_i)
+          NHCN_z(x_i) = NHCN_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indHCN, x_i)
+          NHNC_z(x_i) = NHNC_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indHNC, x_i)
+          NNH_z(x_i) = NNH_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indNH, x_i)
+          NNH2_z(x_i) = NNH2_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indNH2, x_i)
+          NNH3_z(x_i) = NNH3_z(x_i-1) + actual_gas_density * grid_cell_size * abundances(indNH3, x_i)
 
       endif
 
@@ -293,13 +338,22 @@ do output_idx=1, NB_OUTPUTS
       NH2 = NH2_z(x_i)
       NN2 = NN2_z(x_i)
       NCO = NCO_z(x_i)
+      NH2O = NH2O_z(x_i)
+      NCH = NCH_z(x_i)
+      NCH3 = NCH3_z(x_i)
+      NH2CO = NH2CO_z(x_i)
+      NCO2 = NCO2_z(x_i)
+      NN2O = NN2O_z(x_i)
+      NCH4 = NCH4_z(x_i)
+      NOH = NOH_z(x_i)
+      NHCO = NHCO_z(x_i)
+      NCN = NCN_z(x_i)
+      NHCN = NHCN_z(x_i)
+      NHNC = NHNC_z(x_i)
+      NNH = NNH_z(x_i)
+      NNH2 = NNH2_z(x_i)
+      NNH3 = NNH3_z(x_i)
 
-
-!!!!! PROBABLEMENT ICI FAIRE LE CALCUL COMPUTE_LOCAL_FLUX
-! ON FERA PASSER LES FLUX A UNE SEULE DIMENSION EN FONCTION DE Z
-
-!dust_opacity(:) = 0.D0
-!    if (photo_disk.eq.1) call compute_dustopacity
 
       call integrate_chemical_scheme(delta_t=output_timestep, temp_abundances=abundances(1:nb_species, x_i),& ! Inputs
       itol=itol, atol=atol, itask=itask, iopt=iopt, mf=mf, & ! Inputs

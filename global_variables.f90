@@ -55,8 +55,8 @@ real(double_precision), parameter :: AU = 1.49597871d13 !< Astronomical unit in 
 integer(double_precision), parameter :: nb_line_photorates = 134 ! number of lines of the files for br branching ratios
 integer(double_precision), parameter :: nb_line_spec_photorates = 80 ! number of species that have a cross-sections file.
 integer(double_precision), parameter :: wv_max_factor = 309 ! number of first lines to integrate over for UV factor calculation because we don't take the full wv range.
-integer(double_precision), parameter :: nb_line_table_flux = 309 ! number of lines in the fluxes files. Must find anotger way to get this value.
-real(double_precision) :: INT_LOCAL_FLUX ! UV flux in Draine units.
+integer(double_precision), parameter :: nb_line_table_flux = 309 ! number of lines in the fluxes files. Must find another way to get this value.
+real(double_precision) :: INT_LOCAL_FLUX ! UV factor.
 !----------------------------------------------------------------------------
 
 real(double_precision) :: RELATIVE_TOLERANCE !< relative tolerance parameter (scalar) of DLSODES (of the ODEPACK package to solve ODE's)
@@ -92,6 +92,22 @@ character(len=11) :: YKH2O  = 'K01H2O     ' !< H2O in the mantle of the first gr
 character(len=11) :: YJH2O  = 'J01H2O     ' !< H2O on the surface of the first grain
 character(len=11) :: YKH    = 'K01H       ' !< Hydrogen on first grain
 character(len=11) :: YKH2   = 'K01H2      ' !< Dihydrogen on first grain
+character(len=11) :: YCH   = 'CH         ' !< Gas phase CH
+character(len=11) :: YCH3   = 'CH3        ' !< Gas phase CH3
+character(len=11) :: YCO2   = 'CO2        ' !< Gas phase CO2
+character(len=11) :: YH2CO   = 'H2CO       ' !< Gas phase H2CO
+character(len=11) :: YN2O   = 'N2O       ' !< Gas phase N2O
+character(len=11) :: YCH4   = 'CH4       ' !< Gas phase CH4
+character(len=11) :: YOH   = 'OH       ' !< Gas phase OH
+character(len=11) :: YHCO   = 'HCO       ' !< Gas phase HCO
+character(len=11) :: YCN   = 'CN       ' !< Gas phase CN
+character(len=11) :: YHCN   = 'HCN       ' !< Gas phase HCN
+character(len=11) :: YHNC   = 'HNC       ' !< Gas phase HNC
+character(len=11) :: YNH   = 'NH       ' !< Gas phase NH
+character(len=11) :: YNH2   = 'NH2       ' !< Gas phase NH2
+character(len=11) :: YNH3   = 'NH3       ' !< Gas phase NH3
+
+
 
 integer :: INDCO   !< Index corresponding to CO in nb_species length arrays
 integer :: INDKCO  !< Index corresponding to CO on the first grain in nb_species length arrays
@@ -101,6 +117,20 @@ integer :: INDH2   !< Index corresponding to H2 in nb_species length arrays
 integer :: INDH2O  !< Index corresponding to H2O in nb_species length arrays
 integer :: INDKH2O !< Index corresponding to H2O on the first grain in nb_species length arrays
 integer :: INDJH2O !< Index corresponding to H2O on the first grain in nb_species length arrays
+integer :: INDCH  !< Index corresponding to CH in nb_species length arrays
+integer :: INDCH3  !< Index corresponding to CH3 in nb_species length arrays
+integer :: INDH2CO  !< Index corresponding to H2CO in nb_species length arrays
+integer :: INDCO2  !< Index corresponding to CO2 in nb_species length arrays
+integer :: INDN2O  !< Index corresponding to N2O in nb_species length arrays
+integer :: INDCH4  !< Index corresponding to CH4 in nb_species length arrays
+integer :: INDOH  !< Index corresponding to OH in nb_species length arrays
+integer :: INDHCO  !< Index corresponding to HCO in nb_species length arrays
+integer :: INDCN  !< Index corresponding to CN in nb_species length arrays
+integer :: INDHCN  !< Index corresponding to HCN in nb_species length arrays
+integer :: INDHNC  !< Index corresponding to HNC in nb_species length arrays
+integer :: INDNH  !< Index corresponding to NH in nb_species length arrays
+integer :: INDNH2  !< Index corresponding to NH2 in nb_species length arrays
+integer :: INDNH3  !< Index corresponding to NH3 in nb_species length arrays
 integer :: INDH    !< Index corresponding to H in nb_species length arrays
 integer :: INDHE   !< Index corresponding to He in nb_species length arrays
 integer :: INDEL   !< Index corresponding to e- in nb_species length arrays
@@ -259,20 +289,43 @@ real(double_precision), dimension(:,:), allocatable :: grain_radii_1D !< same as
 real(double_precision), dimension(:,:), allocatable :: CR_PEAK_GRAIN_TEMP_all_1D !< for temp storing data
 real(double_precision), dimension(:,:), allocatable :: grain_temp_1D          !< for temp storing data
 ! real(double_precision), dimension(:), allocatable :: grain_radius_1D !< dim(spatial_resolution) [cm] grain sizes in 1D read the 1D_static.dat file, mostly for disk application (depends on the gas-to-dust mass ratio and the grain sizes)
-real(double_precision), dimension(:), allocatable :: NH_z !< dim(spatial_resolution) [cm^-2] H2 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NH_z !< dim(spatial_resolution) [cm^-2] H column density for a 1D case
 real(double_precision), dimension(:), allocatable :: NH2_z !< dim(spatial_resolution) [cm^-2] H2 column density for a 1D case
 real(double_precision), dimension(:), allocatable :: NCO_z !< dim(spatial_resolution) [cm^-2] CO column density for a 1D case
-real(double_precision), dimension(:), allocatable :: NN2_z !< dim(spatial_resolution) [cm^-2] H2 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NN2_z !< dim(spatial_resolution) [cm^-2] N2 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NCH_z !< dim(spatial_resolution) [cm^-2] CH column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NCH3_z !< dim(spatial_resolution) [cm^-2] CH3 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NCH4_z !< dim(spatial_resolution) [cm^-2] CH4 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NH2O_z !< dim(spatial_resolution) [cm^-2] H2O column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NCO2_z !< dim(spatial_resolution) [cm^-2] CO2 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NN2O_z !< dim(spatial_resolution) [cm^-2] N2O column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NOH_z !< dim(spatial_resolution) [cm^-2] OH column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NHCO_z !< dim(spatial_resolution) [cm^-2] HCO column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NH2CO_z !< dim(spatial_resolution) [cm^-2] H2 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NCN_z !< dim(spatial_resolution) [cm^-2] CN column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NHCN_z !< dim(spatial_resolution) [cm^-2] HCN column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NHNC_z !< dim(spatial_resolution) [cm^-2] HNC column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NNH_z !< dim(spatial_resolution) [cm^-2] NH column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NNH2_z !< dim(spatial_resolution) [cm^-2] NH2 column density for a 1D case
+real(double_precision), dimension(:), allocatable :: NNH3_z !< dim(spatial_resolution) [cm^-2] NH3 column density for a 1D case
 
-!-----Variables for protoplanetary disk models and photorates computation-----
+
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+!> @author 
+!> Sacha Gavino
+!
+!> @date 2020
+!
+! DESCRIPTION: 
+!> Variables for photorates computation using cross-sections
+!! some global size are set (nb_species_for_gas, nb_gas_phase_reactions, nb_species_for_gas, nb_surface_reactions, nb_species, nb_reactions)\n
+!! This routine prepare allocation of global dynamical arrays
+!
 real(kind=8), dimension(nb_line_table_flux,2) :: table_ISRF  !
 real(kind=8), dimension(nb_line_table_flux,2) :: table_Istar
 real(kind=8), dimension(nb_line_table_flux,64) :: local_flux_dust ! 2 dimension table. (number of wavelength, number of spatial points)
 real(kind=8), dimension(nb_line_table_flux,64) :: flux_isrf_dust ! 2 dimension table. (number of wavelength, number of spatial points)
 real(kind=8), dimension(nb_line_table_flux) :: local_flux
-real(kind=8), dimension(nb_line_table_flux) :: stellar_flux
-real(kind=8), dimension(nb_line_table_flux) :: local_flux_2
-real(kind=8), dimension(nb_line_table_flux) :: dust_opacity ! is the dust opacity
 real(kind=8), dimension(nb_line_table_flux) :: mol_opacity ! Table of opacity due to the main molecules as a function of wavelength
 character(len=11) :: spec_photo_select
 integer :: x_i
@@ -281,8 +334,12 @@ character(len=11), dimension(nb_line_photorates,8) :: REACTION_COMPOUNDS_NAMES_p
 character(len=11), dimension(nb_line_spec_photorates) :: spec_photo !<
 real(kind=8), dimension(nb_line_photorates) :: table_photo_final !
 real(kind=8), dimension(nb_line_table_flux,nb_line_spec_photorates,4) :: cross_sections
-integer :: id_photo_H2, id_photo_CO, id_photo_N2
-
+integer :: id_photo_H2, id_photo_CO, id_photo_N2 
+integer :: id_photo_CO2, id_photo_H2O, id_photo_N2O
+integer :: id_photo_CH, id_photo_CH3, id_photo_CH4 
+integer :: id_photo_OH, id_photo_HCO, id_photo_H2CO
+integer :: id_photo_NH, id_photo_NH2, id_photo_NH3
+integer :: id_photo_CN, id_photo_HCN, id_photo_HNC
 
 TYPE photodiss_type
     character(len=11) :: name
@@ -290,7 +347,9 @@ TYPE photodiss_type
     real(8) :: k_ion
     ENDTYPE photodiss_type
 TYPE (photodiss_type) :: photorates(nb_line_spec_photorates)
-!----------------------------------------------------------------------------
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 
 integer, parameter :: MAX_NUMBER_REACTION_TYPE=100 !< Max number of various reaction type
 ! The following arrays start at 0 because the index correspond to the reaction type as indexed elsewhere, and there is a type 0 for reactions.
@@ -321,13 +380,14 @@ abstract interface
   end subroutine get_grain_temperature_interface
 end interface
 
+!--- Flags in file parameters.in ---
 integer :: is_3_phase !< Flag for 3 phase model. 1:Activated, 0:2 phase model
 integer :: IS_TEST = 1!< 1:True, 0:False. To thoroughly test reactions and stuff before running the code. This can take a few seconds
 !! so you might switch it off when running several simulations with the exact same chemical network.
 integer :: is_dust_1D !< ! Reading the grain abundance and the NH/AV factor in the 1D_static.dat file (mostly for disks)
 integer :: photo_disk !< ! photodissociation rates of molecules in the gas phase computation in the photorates_disks.f90 routines.
 integer :: is_h2_formation_rate !< ! H2 formation rates on grain surfaces with the fluctuation effects. (Bron et al. (2014))
-integer :: height_h2formation = 64 !< ! spatial point above which the is_h2_formation_rates are computed.
+integer :: height_h2formation !< ! spatial point above which the H2 formation rates following B14 are computed (see documentation).
 integer :: IS_GRAIN_REACTIONS !< Accretion, grain surface reactions
 integer :: IS_H2_ADHOC_FORM !< Ad hoc formation of H2 on grain surfaces (1=activated)
 integer :: GRAIN_TUNNELING_DIFFUSION !< How grain tunneling diffusion is handled
@@ -437,10 +497,25 @@ integer :: nb_nonzeros_values !< number of non-zeros values in the jacobian. Thi
 
 ! Diffusion and 1D variables
 real(double_precision) :: X_IONISATION_RATE !< Ionisation rate due to X-rays [s-1]
-real(double_precision) :: NCO ! column density [cm-2] (for the self shielding)
-real(double_precision) :: NH2 ! column density [cm-2] (for the self shielding)
 real(double_precision) :: NH  ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NH2 ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NCO ! column density [cm-2] (for the self shielding)
 real(double_precision) :: NN2 ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NH2O ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NCO2 ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NN2O ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NCH ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NCH3 ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NCH4 ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NOH ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NHCO ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NH2CO ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NCN ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NHCN ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NHNC ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NNH ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NNH2 ! column density [cm-2] (for the self shielding)
+real(double_precision) :: NNH3 ! column density [cm-2] (for the self shielding)
 
 logical :: first_step_done = .false. !< do we have currently done the first step of the integrator ?
 integer :: NB_OUTPUTS !< Total number of outputs in the simulation
@@ -830,6 +905,52 @@ NN2_z(1:spatial_resolution) = 0.d0
 
 allocate(NCO_z(spatial_resolution))
 NCO_z(1:spatial_resolution) = 0.d0
+
+allocate(NH2O_z(spatial_resolution))
+NH2O_z(1:spatial_resolution) = 0.d0
+
+allocate(NCO2_z(spatial_resolution))
+NCO2_z(1:spatial_resolution) = 0.d0
+
+allocate(NN2O_z(spatial_resolution))
+NN2O_z(1:spatial_resolution) = 0.d0
+
+allocate(NCH_z(spatial_resolution))
+NCH_z(1:spatial_resolution) = 0.d0
+
+allocate(NCH3_z(spatial_resolution))
+NCH3_z(1:spatial_resolution) = 0.d0
+
+allocate(NCH4_z(spatial_resolution))
+NCH4_z(1:spatial_resolution) = 0.d0
+
+allocate(NOH_z(spatial_resolution))
+NOH_z(1:spatial_resolution) = 0.d0
+
+allocate(NHCO_z(spatial_resolution))
+NHCO_z(1:spatial_resolution) = 0.d0
+
+allocate(NH2CO_z(spatial_resolution))
+NH2CO_z(1:spatial_resolution) = 0.d0
+
+allocate(NCN_z(spatial_resolution))
+NCN_z(1:spatial_resolution) = 0.d0
+
+allocate(NHCN_z(spatial_resolution))
+NHCN_z(1:spatial_resolution) = 0.d0
+
+allocate(NHNC_z(spatial_resolution))
+NHNC_z(1:spatial_resolution) = 0.d0
+
+allocate(NNH_z(spatial_resolution))
+NNH_z(1:spatial_resolution) = 0.d0
+
+allocate(NNH2_z(spatial_resolution))
+NNH2_z(1:spatial_resolution) = 0.d0
+
+allocate(NNH3_z(spatial_resolution))
+NNH3_z(1:spatial_resolution) = 0.d0
+
 
 ! Prime elements
 allocate(INITIAL_ELEMENTAL_ABUNDANCE(NB_PRIME_ELEMENTS))

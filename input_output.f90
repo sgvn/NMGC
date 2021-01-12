@@ -2070,7 +2070,6 @@ subroutine get_parameter_value(line, isParameter, id, value)
 
 end subroutine get_parameter_value
 
-subroutine read_br()
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 !> @author
@@ -2086,132 +2085,164 @@ subroutine read_br()
 !              WARNING: make sure that the file branching_ratios.in is here !
 !
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-use utilities
-use global_variables
+subroutine read_br()
+  use utilities
+  use global_variables
 
-implicit none
+  implicit none
 
-!----------------------- VARIABLES -----------------------
-integer :: ios, nb_line, i,j
-integer :: read_branching=9
+  !----------------------- VARIABLES -----------------------
+  integer :: ios, nb_line, i,j
+  integer :: read_branching=9
 
-! Variables for the unordered reaction file
-!character(len=11), dimension(MAX_COMPOUNDS,37) :: SYMBOLUO1
-real(double_precision) :: br
+  ! Variables for the unordered reaction file
+  !character(len=11), dimension(MAX_COMPOUNDS,37) :: SYMBOLUO1
+  real(double_precision) :: br
 
-character(len=80) :: branching
-character(len=177) :: line_reactions
-character(len=11) :: A1,A2,A3,A4,A5,A6,A7,A8
-branching = "branching_ratios.in"
-!---------------------------------------------------------
+  character(len=80) :: branching
+  character(len=177) :: line_reactions
+  character(len=11) :: A1,A2,A3,A4,A5,A6,A7,A8
+  branching = "branching_ratios.in"
+  !---------------------------------------------------------
 
 
-!------OPEN branching_ratios.in here------
-open(unit=read_branching, file=branching, status="old", action="read", iostat=ios)
-if (ios /= 0) stop "Error opening file branching_ratios.in. Check if branching_ratios.in is there."
+  !------OPEN branching_ratios.in here------
+  open(unit=read_branching, file=branching, status="old", action="read", iostat=ios)
+  if (ios /= 0) stop "Error opening file branching_ratios.in. Check if branching_ratios.in is there."
 
-!------GET the number of lines in branching_ratios.in------
-!nb_line = 0
-!DO
-!READ (read_branching,*, END=10)
-!nb_line = nb_line + 1
-!END DO
-!10 CLOSE (1)
-!print *, "number of line in braching_ratios.in is:", nb_line
+  !------GET the number of lines in branching_ratios.in------
+  !nb_line = 0
+  !DO
+  !READ (read_branching,*, END=10)
+  !nb_line = nb_line + 1
+  !END DO
+  !10 CLOSE (1)
+  !print *, "number of line in braching_ratios.in is:", nb_line
 
-! TO DO / READ THE NUMBER OF LINES IN ANOTHER PLACE AND ALLOCATE THE TABLE CORRECTLY. FOR THE
-! MOMENT, THE NUMBER IS GIVEn IN THE DEFINITION.
+  ! TO DO / READ THE NUMBER OF LINES IN ANOTHER PLACE AND ALLOCATE THE TABLE CORRECTLY. FOR THE
+  ! MOMENT, THE NUMBER IS GIVEn IN THE DEFINITION.
 
-!------LOOP over the photodissociation reactions in branching_ratios.in------
-!REWIND(read_branching)
+  !------LOOP over the photodissociation reactions in branching_ratios.in------
+  !REWIND(read_branching)
 
-do j = 1,nb_line_photorates
-    read(read_branching,100) A1,A2,A3,A4,A5,A6,A7,A8,br
-    reaction_compounds_names_photo(J,1) = A1
-    reaction_compounds_names_photo(J,2) = A2
-    reaction_compounds_names_photo(J,3) = A3
-    reaction_compounds_names_photo(J,4) = A4
-    reaction_compounds_names_photo(J,5) = A5
-    reaction_compounds_names_photo(J,6) = A6
-    reaction_compounds_names_photo(J,7) = A7
-    reaction_compounds_names_photo(J,8) = A8
-    br_photo(J) = br
-enddo
+  do j = 1,nb_line_photorates
+      read(read_branching,100) A1,A2,A3,A4,A5,A6,A7,A8,br
+      reaction_compounds_names_photo(J,1) = A1
+      reaction_compounds_names_photo(J,2) = A2
+      reaction_compounds_names_photo(J,3) = A3
+      reaction_compounds_names_photo(J,4) = A4
+      reaction_compounds_names_photo(J,5) = A5
+      reaction_compounds_names_photo(J,6) = A6
+      reaction_compounds_names_photo(J,7) = A7
+      reaction_compounds_names_photo(J,8) = A8
+      br_photo(J) = br
+  enddo
 
-100 FORMAT(3A11,1X,5A11,2X,F14.12)
+  100 FORMAT(3A11,1X,5A11,2X,F14.12)
 
-!-----CLOSE open files-----
-close(read_branching)
+  !-----CLOSE open files-----
+  close(read_branching)
 end subroutine read_br
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-! Subroutine to read the species cross sections from external files
-! protoplanetary disks applications
-
+!> @author
+!> Sacha Gavino
+!
+!> @date June 2019
+!
+! DESCRIPTION: Subroutine to read the species cross sections from folder
+!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 subroutine read_spec_photo()
-use global_variables
-implicit none
+  use global_variables
+  implicit none
 
-integer :: i,j
-character(len=11) :: A1
-character(len=32) :: filename
-real(kind=8), dimension (4) :: line
+  integer :: i,j
+  character(len=11) :: A1
+  character(len=32) :: filename
+  real(kind=8), dimension (4) :: line
 
-open(unit=9, file='cross-sections/param.txt', status="old", action="read")
+  open(unit=9, file='cross-sections/param.txt', status="old", action="read")
 
-do i=1,nb_line_spec_photorates
+  do i=1,nb_line_spec_photorates
     read(9,'(A)') A1
     spec_photo(i) = A1
     if (A1.eq.YH2) id_photo_H2 = i
     if (A1.eq.YCO) id_photo_CO = i
     if (A1.eq.YN2) id_photo_N2 = i
 
-enddo
+    if (A1.eq.YH2O) id_photo_H2O = i
+    if (A1.eq.YCO2) id_photo_CO2 = i
+    if (A1.eq.YN2O) id_photo_N2O = i
 
-close(9)
+    if (A1.eq.YCH) id_photo_CH = i
+    if (A1.eq.YCH3) id_photo_CH3 = i
+    if (A1.eq.YCH4) id_photo_CH4 = i
 
-do i=1,nb_line_spec_photorates
-    filename = 'cross-sections/'//trim(spec_photo(i))//'.txt'
-    open(10, file=filename)
-    do j = 1,6
-        read(10,*)
-    enddo
-    do j = 1,nb_line_table_flux
-       ! read(10,'(e12.6,3(1x,e12.6))')  line
-        read(10,*)  line
-        cross_sections(j,i,:) = line(:)
-    enddo
-    close(10)
-enddo
+    if (A1.eq.YOH) id_photo_OH = i
+    if (A1.eq.YHCO) id_photo_HCO = i
+    if (A1.eq.YH2CO) id_photo_H2CO = i
 
-!write(*,*) spec_photo
+    if (A1.eq.YCN) id_photo_CN = i
+    if (A1.eq.YHCN) id_photo_HCN = i
+    if (A1.eq.YHNC) id_photo_HNC = i
+    
+    if (A1.eq.YNH) id_photo_NH = i
+    if (A1.eq.YNH2) id_photo_NH2 = i
+    if (A1.eq.YNH3) id_photo_NH3 = i
+
+
+  enddo
+
+  close(9)
+
+  do i=1,nb_line_spec_photorates
+      filename = 'cross-sections/'//trim(spec_photo(i))//'.txt'
+      open(10, file=filename)
+      do j = 1,6
+          read(10,*)
+      enddo
+      do j = 1,nb_line_table_flux
+         ! read(10,'(e12.6,3(1x,e12.6))')  line
+          read(10,*)  line
+          cross_sections(j,i,:) = line(:)
+      enddo
+      close(10)
+  enddo
 
 end subroutine read_spec_photo
 
 
 !%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-! subroutine to read the ISRF, local UV, star flux
+!> @author
+!> Sacha Gavino
+!
+!> @date June 2019
+!
+! DESCRIPTION: subroutine to read the ISRF, local UV, star flux
+!
+!%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 subroutine read_flux_tables()
-use global_variables
-implicit none
+  use global_variables
+  implicit none
 
-integer :: i
-character(len=11) :: A1
-character(len=35) :: AA
-real(double_precision), dimension(2) :: line
-real(double_precision), dimension(spatial_resolution) :: line_uv_disk ! different dimension because local_flux_dust.txt has a column for each spatial point.
-real(double_precision), dimension(spatial_resolution) :: line_uv_local ! different dimension because local_flux_dust.txt has a column for each point.
+  integer :: i
+  character(len=11) :: A1
+  character(len=35) :: AA
+  real(double_precision), dimension(2) :: line
+  real(double_precision), dimension(spatial_resolution) :: line_uv_disk ! different dimension because local_flux_dust.txt has a column for each spatial point.
+  real(double_precision), dimension(spatial_resolution) :: line_uv_local ! different dimension because local_flux_dust.txt has a column for each point.
 
-open(unit=9, file='flux/cut_standard_DRAINE_ISRF_1978.txt', status="old", action="read") ! this table is extracted from the Leiden database.
-open(unit=10, file='flux/cut_BLACK_BODY_4000K.txt', status="old", action="read") ! this table is extracted from the Leiden database.
-open(unit=11, file='flux/local_flux_dust.txt', status="old", action="read") ! this table is from the radiative transfer code POLARIS.
-open(unit=12, file='flux/flux_isrf_dust.txt', status="old", action="read") ! this table is from the radiative transfer code POLARIS.
-do i=1,4
+  open(unit=9, file='flux/cut_standard_DRAINE_ISRF_1978.txt', status="old", action="read") ! this table is extracted from the Leiden database.
+  open(unit=10, file='flux/cut_BLACK_BODY_4000K.txt', status="old", action="read") ! this table is extracted from the Leiden database.
+  open(unit=11, file='flux/local_flux_dust.txt', status="old", action="read") ! this table is from the radiative transfer code POLARIS.
+  open(unit=12, file='flux/flux_isrf_dust.txt', status="old", action="read") ! this table is from the radiative transfer code POLARIS.
+  do i=1,4
     read(9,*) AA
     read(10,*) AA
-enddo
-do i=1,nb_line_table_flux
+  enddo
+  do i=1,nb_line_table_flux
     read(9,*) line
     table_ISRF(i,:) = line(:)
     read(10,*) line
@@ -2220,14 +2251,12 @@ do i=1,nb_line_table_flux
     local_flux_dust(i,:) = line_uv_local(:)
     read(12,*) line_uv_disk
     flux_isrf_dust(i,:) = line_uv_disk(:)
-enddo
-close(9)
-close(10)
-close(11)
+  enddo
 
+  close(9)
+  close(10)
+  close(11)
 
 end subroutine read_flux_tables
-
-
 
 end module input_output
