@@ -2234,8 +2234,6 @@ subroutine read_flux_tables()
   real(double_precision), dimension(spatial_resolution) :: line_uv_disk ! different dimension because local_flux_dust.txt has a column for each spatial point.
   real(double_precision), dimension(spatial_resolution) :: line_uv_local ! different dimension because local_flux_dust.txt has a column for each point.
 
-  open(unit=9, file='flux/cut_standard_DRAINE_ISRF_1978.txt', status="old", action="read") ! this table is extracted from the Leiden database.
-  open(unit=10, file='flux/cut_BLACK_BODY_4000K.txt', status="old", action="read") ! this table is extracted from the Leiden database.
   open(unit=11, file='flux/local_flux_dust.txt', status="old", action="read") ! this table is from the radiative transfer code POLARIS.
   open(unit=12, file='flux/flux_isrf_dust.txt', status="old", action="read") ! this table is from the radiative transfer code POLARIS.
   do i=1,4
